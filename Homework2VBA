@@ -1,0 +1,142 @@
+Sub Total_Volume()
+
+    'Declare
+    Dim TickerName As String
+    Dim TotalVolume As Double
+    Dim LastRow As Long
+    Dim PrintRow As Long
+    Dim OpenPrice As Double
+    Dim ClosingPrice As Double
+    Dim PriceDelta As Double
+    Dim PricePercentDelta As Double
+    Dim HighestTotal As Double
+    Dim HighestPercent As Double
+    Dim LowestPercent As Double
+    Dim HighestTotalTicker As String
+    Dim HighestPercentTicker As String
+    Dim LowestPercentTicker As String
+    
+    
+ 'Do this for each worksheet
+    For Each abc In Worksheets
+    
+    'Find the Last Row
+    LastRow = abc.Cells(Rows.Count, 1).End(xlUp).Row
+    
+    'Starting Point
+    PrintRow = 2
+    TotalVolume = 0
+    OpenPrice = abc.Cells(2, 3).Value
+  
+    
+    'Getting unique ticker names & totals & printing in the summary
+    For i = 2 To LastRow
+    
+        If abc.Cells(i + 1, 1).Value <> abc.Cells(i, 1).Value Then
+        
+        
+            'Current ticker name for current running total
+            TickerName = abc.Cells(i, 1).Value
+            TotalVolume = TotalVolume + abc.Cells(i, 7).Value
+            
+            'Record closing price
+            ClosingPrice = abc.Cells(i, 6)
+            If OpenPrice = 0 Then
+            
+            PriceDelta = ClosingPrice - OpenPrice
+            PricePercentDelta = 0
+            
+            Else
+            
+            PriceDelta = ClosingPrice - OpenPrice
+            PricePercentDelta = PriceDelta / OpenPrice
+            
+            End If
+            
+            'Print values
+            abc.Range("I" & PrintRow).Value = TickerName
+            abc.Range("J" & PrintRow).Value = PriceDelta
+            abc.Range("K" & PrintRow).Value = FormatPercent(PricePercentDelta, 2)
+            abc.Range("L" & PrintRow).Value = TotalVolume
+            
+            'Format cell color for PriceDelta
+            If PriceDelta >= 0 Then
+            
+            abc.Range("J" & PrintRow).Interior.ColorIndex = 4
+            
+            Else
+            
+            abc.Range("J" & PrintRow).Interior.ColorIndex = 3
+            
+            End If
+            
+            'Change for where next ticker name will be printed
+            PrintRow = PrintRow + 1
+            
+            'Reset Total volume before function moves to next ticker
+            TotalVolume = 0
+            
+            'Record new open price for new ticker
+            OpenPrice = abc.Cells(i + 1, 3).Value
+            
+            
+        Else
+        
+            TotalVolume = TotalVolume + abc.Cells(i, 7).Value
+            
+           
+        End If
+    
+    
+    Next i
+    
+      'Change LastRow to be looking through Totals List
+       LastRow = abc.Cells(Rows.Count, 9).End(xlUp).Row
+    
+    'Starting point
+    HighestTotal = abc.Cells(2, 12).Value
+    HighestPercent = abc.Cells(2, 11).Value
+    LowestPercent = abc.Cells(2, 11).Value
+    
+    For i = 2 To LastRow
+    
+        If abc.Cells(i, 12).Value > HighestTotal Then
+        
+        HighestTotal = abc.Cells(i, 12).Value
+        HighestTotalTicker = abc.Cells(i, 9).Value
+        
+        End If
+        
+        If abc.Cells(i, 11).Value > HighestPercent Then
+        
+        HighestPercent = abc.Cells(i, 11).Value
+        HighestPercentTicker = abc.Cells(i, 9).Value
+        
+        ElseIf abc.Cells(i, 11).Value < LowestPercent Then
+        
+        LowestPercent = abc.Cells(i, 11).Value
+        LowestPercentTicker = abc.Cells(i, 9).Value
+        
+        End If
+        
+    Next i
+        
+        abc.Range("O2").Value = HighestPercentTicker
+        abc.Range("P2").Value = FormatPercent(HighestPercent, 2)
+        abc.Range("O3").Value = LowestPercentTicker
+        abc.Range("P3").Value = FormatPercent(LowestPercent, 2)
+        abc.Range("O4").Value = HighestTotalTicker
+        abc.Range("P4").Value = HighestTotal
+        
+    Next abc
+    
+    
+    
+    MsgBox ("All done!")
+    
+    
+    
+End Sub
+
+
+
